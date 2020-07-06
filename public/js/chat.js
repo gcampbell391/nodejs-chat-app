@@ -1,28 +1,64 @@
 const socket = io()
 
+//Elements
+const messageForm = document.querySelector('#messageForm')
+const messageFormInput = messageForm.querySelector('input')
+const messageFormButton = messageForm.querySelector('button')
+const sendLocationButton = document.querySelector('#sendLocation')
+const messages = document.querySelector('#messages')
+
+//Templates
+const messageTemplate = document.querySelector('#message-template').innerHTML
+const locationTemplate = document.querySelector('#location-template').innerHTML
+
 socket.on('message', (message) => {
-    console.log(message)
+    const html = Mustache.render(messageTemplate, {
+        message: message.text,
+        createdAt: moment(message.createdAt).format('h:mm a')
+    })
+    messages.insertAdjacentHTML('beforeend', html)
+
 })
 
-document.querySelector('#messageForm').addEventListener('submit', (event) => {
+socket.on('locationMessage', (locationMessage) => {
+    const html = Mustache.render(locationTemplate, {
+        locationURL: locationMessage.url,
+        createdAt: moment(locationMessage.createdAt).format('h:mm a')
+    })
+    messages.insertAdjacentHTML('beforeend', html)
+})
+
+messageForm.addEventListener('submit', (event) => {
     event.preventDefault()
+    messageFormButton.setAttribute('disabled', 'disabled')
     const message = event.target.elements.message.value
-    socket.emit('sendMessage', message)
-    event.target.reset()
+    socket.emit('sendMessage', message, (error) => {
+        messageFormButton.removeAttribute('disabled')
+        messageFormInput.focus()
+        if (error) {
+            return console.log(error)
+        }
+        console.log('Message Delivered')
+    })
+    messageForm.reset()
 })
 
-document.querySelector('#sendLocation').addEventListener('click', () => {
+sendLocationButton.addEventListener('click', () => {
     if (!navigator.geolocation) {
         return alert('Geolocation is not supported by your browser...')
     }
 
     //Gets current location 
     navigator.geolocation.getCurrentPosition((position) => {
+        sendLocationButton.setAttribute('disabled', 'disabled')
         const coords = {
             lat: position.coords.latitude,
             long: position.coords.longitude
         }
-        socket.emit('sendLocation', coords)
+        socket.emit('sendLocation', coords, () => {
+            sendLocationButton.removeAttribute('disabled')
+            console.log('Location was shared!')
+        })
 
     })
 })
