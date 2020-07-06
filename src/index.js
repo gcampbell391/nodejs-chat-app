@@ -13,8 +13,28 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 
 app.use(express.static(publicDirectoryPath))
 
-io.on('connection', () => {
+//socket.emit sends data to one connection...io.emit sends data to all connections...
+//socket.broadcast.emit sends data to all connections but itselfs 
+io.on('connection', (socket) => {
     console.log('New WebSocket connection')
+
+    let message = 'Welcome!'
+    socket.emit('message', message)
+
+    socket.broadcast.emit('message', 'A new user has joined')
+
+    socket.on('sendMessage', (message) => {
+        io.emit('message', message)
+    })
+
+    socket.on('sendLocation', (coords) => {
+        io.emit('message', `https://google.com/maps?q=${coords.lat},${coords.long}`)
+    })
+
+    socket.on('disconnect', () => {
+        io.emit('message', 'A user has left')
+    })
+
 })
 
 server.listen(port, () => {
