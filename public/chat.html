@@ -31,7 +31,7 @@
                 <span class="message__name">{{username}}</span>
                 <span class="message__meta">{{createdAt}}</span>
             </p>
-            <p>{{message}}</p>
+            <p class="userMessage">{{message}}</p>
         </div>
     </script>
     <script id="location-template" type="text/html">
@@ -40,12 +40,12 @@
                 <span class="message__name">{{username}}</span>
                 <span class="message__meta">{{createdAt}}</span>
             </p>
-            <p><a href={{locationURL}} target='_blank'>My Current Location</a></p>
+            <p><a href={{locationURL}} target='_blank' class="userMessage">My Current Location</a></p>
         </div>
     </script>
     <script id="sidebar-template" type="text/html">
         <h2 class="room-title">{{room}}</h2>
-        <h3 class="list-title">Users</h3>
+        <h3 class="list-title">Current Users</h3>
         <ul class="users">
             {{#users}}
                 <li>{{username}}<li>
